@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if(APPLE)
   if(CMAKE_OSX_ARCHITECTURES MATCHES "arm64")
@@ -13,7 +14,7 @@ endif()
 
 project(pd C CXX)
 
-include(TargetArch)
+include(${CURRENT} TargetArch)
 include(FindPkgConfig)
 include(AssetUtils)
 
@@ -33,7 +34,7 @@ endif()
 # Options
 
 set(ROMID "ntsc-final" CACHE STRING "Which ROM to build an executable for: ntsc-final, pal-final or jpn-final")
-option(FORCE_CROSSCOMPILE "Force cross compiling" NO)
+option(FORCE_CROSSCOMPILE "Force cross compiling" YES)
 
 # Determine target arch
 
@@ -100,7 +101,7 @@ endif()
 # git commit hash
 execute_process(
   COMMAND git rev-parse --short HEAD
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   OUTPUT_VARIABLE VERSION_HASH
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
@@ -108,7 +109,7 @@ execute_process(
 # git branch name
 execute_process(
   COMMAND git rev-parse --abbrev-ref HEAD
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   OUTPUT_VARIABLE VERSION_BRANCH
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
@@ -124,8 +125,11 @@ endif()
 
 message(STATUS "Version: ${VERSION_ROMID}, hash ${VERSION_HASH}, branch ${VERSION_BRANCH}")
 
-configure_file("${CMAKE_SOURCE_DIR}/port/include/versioninfo.h.in" "${CMAKE_BINARY_DIR}/port/include/versioninfo.h" @ONLY)
-
+if (NOT ANDROID)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/port/include/versioninfo.h.in" "${CMAKE_BINARY_DIR}/port/include/versioninfo.h" @ONLY)
+else ()
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/port/include/versioninfo.h.in" "${CMAKE_BINARY_DIR}/port/include/versioninfo.h" @ONLY)
+endif ()
 set(ASSET_DIR "src/assets/${ROMID}")
 set(GENERATED_DIR "src/generated/${ROMID}")
 
@@ -154,12 +158,12 @@ endif()
 # Compiler flags
 
 # Include directories
-include_directories("${CMAKE_SOURCE_DIR}/include")
-include_directories("${CMAKE_SOURCE_DIR}/include/PR")
-include_directories("${CMAKE_SOURCE_DIR}/src/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/PR")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/include")
 include_directories("${CMAKE_BINARY_DIR}/src/generated/${ROMID}")
-include_directories("${CMAKE_SOURCE_DIR}/src/lib/ultra/audio")
-include_directories("${CMAKE_SOURCE_DIR}/port/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/lib/ultra/audio")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/port/include")
 include_directories("${CMAKE_BINARY_DIR}/port/include")
 
 # Set Release optimization to -Og until I fix the -O2 issues
@@ -257,15 +261,15 @@ list(APPEND LIBS "${EXTRA_LIBRARIES}")
 
 # Sources
 
-file(GLOB_RECURSE SRC_PORT "${CMAKE_SOURCE_DIR}/port/*.c")
-file(GLOB_RECURSE SRC_PORT_CXX "${CMAKE_SOURCE_DIR}/port/*.cpp")
+file(GLOB_RECURSE SRC_PORT "${CMAKE_CURRENT_SOURCE_DIR}/port/*.c")
+file(GLOB_RECURSE SRC_PORT_CXX "${CMAKE_CURRENT_SOURCE_DIR}/port/*.cpp")
 
-file(GLOB_RECURSE SRC_GAME "${CMAKE_SOURCE_DIR}/src/game/*.c")
+file(GLOB_RECURSE SRC_GAME "${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.c")
 
-file(GLOB SRC_LIB_MP3 "${CMAKE_SOURCE_DIR}/src/lib/mp3/*.c")
-file(GLOB SRC_LIB_NAUDIO "${CMAKE_SOURCE_DIR}/src/lib/naudio/*.c")
-file(GLOB SRC_LIB_ULTRA_AUDIO "${CMAKE_SOURCE_DIR}/src/lib/ultra/audio/*.c")
-file(GLOB SRC_LIB_GU "${CMAKE_SOURCE_DIR}/src/lib/ultra/gu/*.c")
+file(GLOB SRC_LIB_MP3 "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/mp3/*.c")
+file(GLOB SRC_LIB_NAUDIO "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/naudio/*.c")
+file(GLOB SRC_LIB_ULTRA_AUDIO "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/ultra/audio/*.c")
+file(GLOB SRC_LIB_GU "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/ultra/gu/*.c")
 set(SRC_LIB
   src/lib/ultra/io/vimodentsclan1.c
   src/lib/ultra/io/vimodepallan1.c
@@ -310,7 +314,7 @@ set(SRC_LIB
   src/lib/vi.c
   src/textureconfig.c
 )
-list(PREPEND SRC_LIB "${CMAKE_SOURCE_DIR}")
+list(PREPEND SRC_LIB "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(SRC
   ${SRC_GAME}
@@ -324,25 +328,31 @@ set(SRC
 )
 
 if(WIN32)
-  list(APPEND SRC "${CMAKE_SOURCE_DIR}/dist/windows/icon.rc")
+  list(APPEND SRC "${CMAKE_CURRENT_SOURCE_DIR}/dist/windows/icon.rc")
 endif()
 
 # Asset files
 
-generate_asset_headers("lang/" "${CMAKE_SOURCE_DIR}/tools/assetmgr/mklang" "en" JSON_HEADERS)
-generate_asset_headers("pads/" "${CMAKE_SOURCE_DIR}/tools/assetmgr/mkpads" "" JSON_HEADERS)
-generate_asset_headers("tiles/" "${CMAKE_SOURCE_DIR}/tools/assetmgr/mktiles" "" JSON_HEADERS)
-generate_asset_headers("animations.json" "${CMAKE_SOURCE_DIR}/tools/assetmgr/mkanims" "" JSON_HEADERS)
-generate_asset_headers("sequences.json" "${CMAKE_SOURCE_DIR}/tools/assetmgr/mksequences" "" JSON_HEADERS)
-generate_asset_headers("textures.json" "${CMAKE_SOURCE_DIR}/tools/assetmgr/mktextures" "" JSON_HEADERS)
+if (NOT ANDROID)
+generate_asset_headers("lang/" "${CMAKE_CURRENT_SOURCE_DIR}/tools/assetmgr/mklang" "en" JSON_HEADERS)
+generate_asset_headers("pads/" "${CMAKE_CURRENT_SOURCE_DIR}/tools/assetmgr/mkpads" "" JSON_HEADERS)
+generate_asset_headers("tiles/" "${CMAKE_CURRENT_SOURCE_DIR}/tools/assetmgr/mktiles" "" JSON_HEADERS)
+generate_asset_headers("animations.json" "${CMAKE_CURRENT_SOURCE_DIR}/tools/assetmgr/mkanims" "" JSON_HEADERS)
+generate_asset_headers("sequences.json" "${CMAKE_CURRENT_SOURCE_DIR}/tools/assetmgr/mksequences" "" JSON_HEADERS)
+generate_asset_headers("textures.json" "${CMAKE_CURRENT_SOURCE_DIR}/tools/assetmgr/mktextures" "" JSON_HEADERS)
 
 add_custom_target(pd_headers ALL DEPENDS ${JSON_HEADERS})
-
+endif ()
 # Game target
 
-set(BIN_NAME "pd${BIN_REGION}.${TARGET_ARCH}")
-add_executable(pd ${SRC})
-add_dependencies(pd pd_headers)
+if (NOT ANDROID)
+    set(BIN_NAME "pd${BIN_REGION}.${TARGET_ARCH}")
+    add_executable(pd ${SRC})
+    add_dependencies(pd pd_headers)
+else ()
+    set(BIN_NAME "pd${BIN_REGION}_${TARGET_ARCH}")
+    add_library(pd SHARED ${SRC})
+endif ()
 target_link_libraries(pd ${LIBS})
 set_target_properties(pd PROPERTIES OUTPUT_NAME "${BIN_NAME}")
 if(WIN32)
@@ -355,6 +365,6 @@ if(NINTENDO_SWITCH)
   add_custom_command(TARGET pd POST_BUILD
     COMMAND nacptool --create "Perfect Dark" "fgsfds and contributors" "${VERSION_ROMID}/${VERSION_BRANCH}/${VERSION_HASH}" "${BIN_NAME}.nacp"
     COMMAND aarch64-none-elf-strip -o ${CMAKE_BINARY_DIR}/${BIN_NAME}.stripped.elf ${CMAKE_BINARY_DIR}/${BIN_NAME}.elf
-    COMMAND elf2nro ${CMAKE_BINARY_DIR}/${BIN_NAME}.stripped.elf ${CMAKE_BINARY_DIR}/${BIN_NAME}.nro --icon=${CMAKE_SOURCE_DIR}/dist/nswitch/icon.jpg --nacp=${BIN_NAME}.nacp
+    COMMAND elf2nro ${CMAKE_BINARY_DIR}/${BIN_NAME}.stripped.elf ${CMAKE_BINARY_DIR}/${BIN_NAME}.nro --icon=${CMAKE_CURRENT_SOURCE_DIR}/dist/nswitch/icon.jpg --nacp=${BIN_NAME}.nacp
   )
 endif()
