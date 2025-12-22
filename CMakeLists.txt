@@ -18,7 +18,7 @@ include(${CURRENT} TargetArch)
 include(FindPkgConfig)
 include(AssetUtils)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -123,11 +123,8 @@ if((VERSION_BRANCH STREQUAL "") OR (VERSION_BRANCH STREQUAL "HEAD"))
   set(VERSION_BRANCH "port-custom")
 endif()
 
-message(STATUS "Version: ${VERSION_ROMID}, hash ${VERSION_HASH}, branch ${VERSION_BRANCH}")
-
 if (NOT ANDROID)
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/port/include/versioninfo.h.in" "${CMAKE_BINARY_DIR}/port/include/versioninfo.h" @ONLY)
-else ()
+    message(STATUS "Version: ${VERSION_ROMID}, hash ${VERSION_HASH}, branch ${VERSION_BRANCH}")
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/port/include/versioninfo.h.in" "${CMAKE_BINARY_DIR}/port/include/versioninfo.h" @ONLY)
 endif ()
 set(ASSET_DIR "src/assets/${ROMID}")
@@ -165,6 +162,10 @@ include_directories("${CMAKE_BINARY_DIR}/src/generated/${ROMID}")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/lib/ultra/audio")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/port/include")
 include_directories("${CMAKE_BINARY_DIR}/port/include")
+
+if (ANDROID)
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/generated/ntsc-final")
+endif ()
 
 # Set Release optimization to -Og until I fix the -O2 issues
 if(NOT (CMAKE_BUILD_TYPE STREQUAL "Debug"))
