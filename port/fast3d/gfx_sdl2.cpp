@@ -123,6 +123,8 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
         fullscreen_flag = SDL_WINDOW_FULLSCREEN;
     }
 
+
+#ifndef ANDROID
     // we will unhide the window once the GL context is successfully created
     Uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
 
@@ -131,11 +133,13 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
         flags |= fullscreen_flag;
         fullscreen_state = true;
     }
-
     if (set->maximized) {
         flags |= SDL_WINDOW_MAXIMIZED;
         maximized_state = true;
     }
+#else
+    Uint32 flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN;
+#endif
 
 #ifdef SDL_WINDOW_ALLOW_HIGHDPI
     if (set->allow_hidpi) {
@@ -168,6 +172,7 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
         }
     }
 
+#ifndef ANDROID
     ctx = NULL;
     u32 vmin = 0, vmaj = 0, vprof = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY;
     const char *vprofstr = "";
@@ -196,11 +201,35 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
         }
     }
 
-    if (!wnd || !ctx) {
+        if (!wnd || !ctx) {
         sysFatalError("Could not open SDL window with an OpenGL context of any supported version:\n%s", SDL_GetError());
     } else {
         sysLogPrintf(LOG_NOTE, "SDL: created GL%d.%d%s context", vmaj, vmin, vprofstr);
     }
+
+#else
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,  3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+        wnd = SDL_CreateWindow(set->title, 0, 0, 0, 0, flags);
+
+        if (!wnd) {
+            sysLogPrintf(LOG_WARNING, "SDL: could not open SDL window %s", SDL_GetError());
+        }
+
+        ctx = SDL_GL_CreateContext(wnd);
+        if (!ctx) {
+            sysLogPrintf(LOG_WARNING, "SDL: could not create context: %s", SDL_GetError());
+            SDL_DestroyWindow(wnd);
+            wnd = nullptr;
+        }
+
+    if (!wnd || !ctx) {
+        sysFatalError("Could not open SDL window with an OpenGL context of any supported version:\n%s", SDL_GetError());
+    } else {
+        sysLogPrintf(LOG_NOTE, "SDL: created context");
+    }
+#endif
 
     SDL_GL_MakeCurrent(wnd, ctx);
     SDL_GL_SetSwapInterval(1);

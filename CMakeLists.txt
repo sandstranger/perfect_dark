@@ -25,7 +25,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # On first build set the build type to RelWithDebInfo if it's not already set
-if (NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
+if (NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt AND NOT ANDROID)
   if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
   endif()
@@ -235,7 +235,7 @@ endif()
 list(APPEND LIBS "${ZLIB_LIBRARY}")
 
 # GL
-if(NOT GL_LIBRARY)
+if(NOT GL_LIBRARY AND NOT ANDROID)
   if(WIN32)
     set(GL_LIBRARY opengl32)
   elseif(NINTENDO_SWITCH)
@@ -245,7 +245,10 @@ if(NOT GL_LIBRARY)
   else()
     set(GL_LIBRARY GL)
   endif()
-endif()
+else ()
+    set(GL_LIBRARY EGL)
+endif ()
+
 list(APPEND LIBS "${GL_LIBRARY}")
 
 # Platform-specific extra libs
