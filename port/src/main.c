@@ -3,7 +3,6 @@
 #include <PR/ultratypes.h>
 #include <PR/ultrasched.h>
 #include <PR/os_message.h>
-#include <unistd.h>
 
 #include "lib/main.h"
 #include "bss.h"
@@ -18,6 +17,9 @@
 #include "mod.h"
 #include "system.h"
 #include "utils.h"
+#if ANDROID
+#include <unistd.h>
+#endif
 
 u32 g_OsMemSize = 0;
 s32 g_OsMemSizeMb = 16;
@@ -196,3 +198,19 @@ PD_CONSTRUCTOR static void gameConfigInit(void)
 		configRegisterInt(strFmt("Game.Player%d.UseKeyReloads", i), &g_PlayerExtCfg[j].usereloads, 0, false);
 	}
 }
+
+#ifdef ANDROID
+void resumeSound() {
+}
+
+void pauseSound() {
+}
+
+bool needToShowScreenControls() {
+    return true;
+}
+
+bool needToInvokeMouseButtonsEvents(){
+    return true;
+}
+#endif
