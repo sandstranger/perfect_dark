@@ -3,6 +3,7 @@
 #include <PR/ultratypes.h>
 #include <PR/ultrasched.h>
 #include <PR/os_message.h>
+#include <unistd.h>
 
 #include "lib/main.h"
 #include "bss.h"
@@ -93,14 +94,21 @@ static void cleanup(void)
 	// TODO: actually shut down all subsystems
 }
 
+#ifdef ANDROID
+int SDL_main(int argc, const char **argv)
+#else
 int main(int argc, const char **argv)
+#endif
 {
 	sysInitArgs(argc, argv);
 
+#ifndef ANDROID
 	if (!sysArgCheck("--no-crash-handler")) {
 		crashInit();
 	}
-
+#else
+    chdir(getenv("HOME_DIRECTORY"));
+#endif
 	sysInit();
 	fsInit();
 	configInit();

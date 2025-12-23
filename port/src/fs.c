@@ -96,6 +96,9 @@ const char *fsFullPath(const char *relPath)
 
 s32 fsInit(void)
 {
+    // if this is set, default to exe path for everything
+    const s32 portable = sysArgCheck("--portable");
+#ifndef ANDROID
 	sysGetExecutablePath(exeDir, FS_MAXPATH);
 
 	// if this is set, default to exe path for everything
@@ -105,7 +108,12 @@ s32 fsInit(void)
 	} else {
 		sysGetHomePath(homeDir, FS_MAXPATH);
 	}
-
+#else
+    const char *pathToHomeDirectory = getenv("HOME_DIRECTORY");
+    const size_t pathToHomeDirectorySize = strlen(pathToHomeDirectory);
+    strncpy(exeDir, pathToHomeDirectory, pathToHomeDirectorySize);
+    strncpy(homeDir, pathToHomeDirectory, pathToHomeDirectorySize);
+#endif
 	// get path to base dir and expand it if needed
 	const char *path = sysArgGetString("--basedir");
 	if (!path) {
@@ -131,6 +139,7 @@ s32 fsInit(void)
 				strncpy(modDir, fsFullPath(path), FS_MAXPATH);
 			}
 		} else {
+#ifndef ANDROID
 			// path is relative to workdir; try to find it
 			const char *priority[] = { ".", "$E", "$H" };
 			for (s32 i = 0; i < 2 + (portable != 0); ++i) {
@@ -140,6 +149,7 @@ s32 fsInit(void)
 					break;
 				}
 			}
+#endif
 		}
 		if (!modDir[0]) {
 			sysLogPrintf(LOG_WARNING, "could not find specified moddir `%s`", path);

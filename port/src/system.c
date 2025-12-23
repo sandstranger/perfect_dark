@@ -175,6 +175,7 @@ void sysLogPrintf(s32 level, const char *fmt, ...)
 	vsnprintf(logmsg, sizeof(logmsg), fmt, ap);
 	va_end(ap);
 
+#ifndef ANDROID
 	if (logPath[0]) {
 		FILE *f = fopen(logPath, "ab");
 		if (f) {
@@ -185,6 +186,9 @@ void sysLogPrintf(s32 level, const char *fmt, ...)
 
 	FILE *fout = (level == LOG_NOTE) ? stdout : stderr;
 	fprintf(fout, "%s%s\n", prefix[level], logmsg);
+#else
+    SDL_Log("%s", logmsg);
+#endif
 }
 
 void sysFatalError(const char *fmt, ...)
