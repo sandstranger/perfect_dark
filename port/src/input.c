@@ -88,8 +88,8 @@ static s32 mouseLockMode = MLOCK_AUTO;
 static u64 mouseCursorTime = 0;
 static s32 mouseShowCursor = 1;
 
-static f32 mouseSensX = 2.5f;
-static f32 mouseSensY = 2.5f;
+static f32 mouseSensX = 9.0f;
+static f32 mouseSensY = 9.0f;
 
 static s32 lastKey = 0;
 static char lastChar = 0;
@@ -716,8 +716,8 @@ s32 inputInit(void)
 		SDL_SetHint(SDL_HINT_JOYSTICK_RAWINPUT_CORRELATE_XINPUT, "1");
 	}
 
-	if (!SDL_WasInit(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC)) {
-		SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
+	if (!SDL_WasInit(SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC)) {
+		SDL_InitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
 	}
 
 
