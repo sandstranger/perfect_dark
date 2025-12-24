@@ -677,6 +677,9 @@ static inline void inputLoadBinds(void)
 
 s32 inputInit(void)
 {
+#ifdef ANDROID
+    SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
+#endif
 	// Set SDL hints before initializing the controller subsystem.
 	if (useHIDAPI) {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
