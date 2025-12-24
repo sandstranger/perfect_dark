@@ -717,6 +717,8 @@ s32 inputInit(void)
 		SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
 	}
 
+
+#ifndef ANDROID
 	// try to load controller db from an external file in the save folder
 	if (fsFileSize("$S/" CONTROLLERDB_FNAME)) {
 		const char *dbpath = fsFullPath("$S/" CONTROLLERDB_FNAME);
@@ -725,7 +727,14 @@ s32 inputInit(void)
 			sysLogPrintf(LOG_NOTE, "input: added %d controller mappings from %s", dbcount, dbpath);
 		}
 	}
-
+#else
+    char *pathToSdl2ControllerDb = getenv("PATH_TO_SDL2_CONTROLLER_DB");
+    if (SDL_GameControllerAddMappingsFromFile(pathToSdl2ControllerDb) < 0) {
+        SDL_Log("Couldn't load mappings: %s\n", SDL_GetError());
+    } else{
+        SDL_Log("Custom controller db was loaded from: %s", pathToSdl2ControllerDb);
+    }
+#endif
 	inputInitAllControllers();
 
 	// since the main event loop is elsewhere, we can receive some events we need using a watcher
