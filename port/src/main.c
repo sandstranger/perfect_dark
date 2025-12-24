@@ -206,11 +206,14 @@ void resumeSound() {
 void pauseSound() {
 }
 
-bool needToShowScreenControls() {
-    return true;
+bool needToInvokeMouseButtonsEvents(){
+    bool inMenu = g_MenuData.count > 0;
+    bool inCutScene = g_Vars.in_cutscene > 0;
+    return inMenu || inCutScene;
 }
 
-bool needToInvokeMouseButtonsEvents(){
-    return true;
+bool needToShowScreenControls() {
+    return !needToInvokeMouseButtonsEvents();
 }
+
 #endif
