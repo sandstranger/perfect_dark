@@ -39,10 +39,15 @@ static int32_t gfx_sdl_get_fullscreen_state(void) {
 }
 
 static int32_t gfx_sdl_get_fullscreen_flag_mode(void) {
+#ifndef ANDROID
     return fullscreen_flag == SDL_WINDOW_FULLSCREEN_DESKTOP ? 0 : 1;
+#else
+    return 1;
+#endif
 }
 
 static void gfx_sdl_set_fullscreen_flag(int32_t mode) {
+#ifndef ANDROID
     switch (mode) {
         case 0: {
             fullscreen_flag = SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -51,23 +56,28 @@ static void gfx_sdl_set_fullscreen_flag(int32_t mode) {
             fullscreen_flag = SDL_WINDOW_FULLSCREEN;
         } break;
     }
+#endif
 }
 
 static void set_fullscreen(bool on, bool call_callback) {
+#ifndef ANDROID
     fullscreen_state = on;
     SDL_SetWindowFullscreen(wnd, on ? fullscreen_flag : 0);
     if (call_callback && on_fullscreen_changed_callback) {
         on_fullscreen_changed_callback(on);
     }
+#endif
 }
 
 static void set_maximize_window(bool on) {
+#ifndef ANDROID
 	maximized_state = on;
 	if (on) {
 		SDL_MaximizeWindow(wnd);
 	} else {
 		SDL_RestoreWindow (wnd);
 	}
+#endif
 }
 
 static void gfx_sdl_get_active_window_refresh_rate(uint32_t* refresh_rate) {
@@ -138,6 +148,7 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
         maximized_state = true;
     }
 #else
+    fullscreen_state = true;
     Uint32 flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN;
 #endif
 
@@ -147,6 +158,7 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
     }
 #endif
 
+#ifndef ANDROID
     // ideally we need 3.0 compat
     // if that doesn't work, try 3.2 core in case we're on mac, 2.1 compat as a last resort
     static u32 glver[][3] = {
@@ -172,7 +184,6 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
         }
     }
 
-#ifndef ANDROID
     ctx = NULL;
     u32 vmin = 0, vmaj = 0, vprof = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY;
     const char *vprofstr = "";
@@ -252,6 +263,7 @@ static void gfx_sdl_set_fullscreen(bool enable) {
 }
 
 static void gfx_sdl_set_fullscreen_exclusive(bool enable) {
+#ifndef ANDROID
     const uint32_t newflag = enable ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_FULLSCREEN_DESKTOP;
     if (fullscreen_flag != newflag) {
         fullscreen_flag = newflag;
@@ -261,6 +273,7 @@ static void gfx_sdl_set_fullscreen_exclusive(bool enable) {
             set_fullscreen(enable, true);
         }
     }
+#endif
 }
 
 static void gfx_sdl_set_maximize_window(bool enable) {
@@ -321,12 +334,14 @@ static void gfx_sdl_handle_events(void) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
+#ifndef ANDROID
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_RETURN && (event.key.keysym.mod & KMOD_ALT)) {
                     // alt-enter received, switch fullscreen state
                     set_fullscreen(!fullscreen_state, true);
                 }
                 break;
+#endif
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
                     SDL_GL_GetDrawableSize(wnd, &window_width, &window_height);

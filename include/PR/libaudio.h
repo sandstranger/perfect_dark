@@ -174,26 +174,26 @@ typedef void    *ALFxRef;
 enum    {AL_ADPCM_WAVE = 0,
          AL_RAW16_WAVE};
 
-typedef struct {
+typedef struct __attribute__((packed)){
     s32 order;
     s32 npredictors;
     s16 book[128];        /* Actually variable size. Must be 8-byte aligned */
 } ALADPCMBook;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     u32         start;
     u32         end;
     u32         count;
     ADPCM_STATE state;
 } ALADPCMloop;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     u32         start;
     u32         end;
     u32         count;
 } ALRawLoop;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     ALMicroTime attackTime;
     ALMicroTime decayTime;
     ALMicroTime releaseTime;
@@ -201,7 +201,7 @@ typedef struct {
     u8          decayVolume;
 } ALEnvelope;
 
-typedef struct {
+typedef struct __attribute__((packed)){
     u8          velocityMin;
     u8          velocityMax;
     u8          keyMin;
@@ -210,16 +210,16 @@ typedef struct {
     s8          detune;
 } ALKeyMap;
 
-typedef struct {
+typedef struct __attribute__((packed)){
     ALADPCMloop *loop;
     ALADPCMBook *book;
 } ALADPCMWaveInfo;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     ALRawLoop *loop;
 } ALRAWWaveInfo;
 
-typedef struct ALWaveTable_s {
+typedef struct __attribute__((packed)) ALWaveTable_s  {
     u8          *base;          /* ptr to start of wave data    */
     s32         len;            /* length of data in bytes      */
     u8          type;           /* compression type             */
@@ -230,7 +230,7 @@ typedef struct ALWaveTable_s {
     } waveInfo;
 } ALWaveTable;
 
-typedef struct ALSound_s {
+typedef struct __attribute__((packed)) ALSound_s {
     ALEnvelope  *envelope;
     ALKeyMap    *keyMap;
     ALWaveTable *wavetable;     /* offset to wavetable struct           */
