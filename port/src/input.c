@@ -921,6 +921,12 @@ void inputUpdateMouse(void)
 	mouseX = mx;
 	mouseY = my;
 
+#if ANDROID
+    if (mouseLocked && mouseShowCursor){
+        inputMouseShowCursor(0);
+    }
+#endif
+
 	// if MLOCK_AUTO is enabled, disable cursor if mouse is unlocked
 	// and we haven't moved it for a few seconds
 	if (mouseLockMode == MLOCK_AUTO && !mouseLocked) {
@@ -930,7 +936,7 @@ void inputUpdateMouse(void)
 			}
 		} else if (sysGetMicroseconds() > mouseCursorTime) {
 			if (mouseShowCursor) {
-				inputMouseShowCursor(0);
+                inputMouseShowCursor(0);
 			}
 		}
 	}
