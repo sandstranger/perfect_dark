@@ -5202,12 +5202,18 @@ void menuProcessInput(void)
 		inputs.start = starttap ? true : false;
 
 #ifndef PLATFORM_N64
+
 		// if we haven't been using the mouse but we have been keyboard scrolling disable the mouse
 		if (!inputs.mousemoved && (inputs.leftright || inputs.updown || inputs.leftrightheld || inputs.updownheld)) {
 			g_MenuUsingMouse = false;
 		}
-		// otherwise rotate left/right by clicking on the side of the menu
+
+        // otherwise rotate left/right by clicking on the side of the menu
+#ifndef ANDROID
 		if (g_MenuUsingMouse && inputs.select && !inputs.leftright && !inputs.leftrightheld) {
+#else
+        if (g_MenuUsingMouse && inputs.mouseheld && inputs.select && !inputs.leftright && !inputs.leftrightheld) {
+#endif
 			if (inputs.mousey > dialog->y && inputs.mousey < dialog->y + dialog->height) {
 				if (inputs.mousex < dialog->x) {
 					inputs.leftright = -1;

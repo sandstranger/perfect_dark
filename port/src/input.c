@@ -1240,7 +1240,6 @@ static inline u32 inputContToContKey(const u32 cont)
 
 s32 inputButtonPressed(s32 idx, u32 contbtn)
 {
-    return 0;
 	if (idx < 0 || idx >= INPUT_MAX_CONTROLLERS) {
 		return 0;
 	}
@@ -1263,7 +1262,7 @@ s32 inputMouseGetPosition(s32 *x, s32 *y)
 {
 	if (x) *x = mouseX * videoGetNativeWidth() / videoGetWidth();
 	if (y) *y = mouseY * videoGetNativeHeight() / videoGetHeight();
-	return true;
+    return (mouseDX != 0 || mouseDY != 0);
 }
 
 void inputMouseGetRawDelta(s32 *dx, s32 *dy)
