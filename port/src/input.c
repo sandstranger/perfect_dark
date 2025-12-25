@@ -466,6 +466,10 @@ static inline void inputInitAllControllers(void)
 	}
 }
 
+#if ANDROID
+bool isLeftMouseButtonDown = false;
+#endif
+
 static int inputEventFilter(void *data, SDL_Event *event)
 {
 	switch (event->type) {
@@ -504,11 +508,23 @@ static int inputEventFilter(void *data, SDL_Event *event)
 			break;
 
 		case SDL_MOUSEBUTTONDOWN:
+#if ANDROID
+            if (event->button.button == SDL_BUTTON_LEFT) {
+                isLeftMouseButtonDown = true;
+            }
+#endif
 			if (!lastKey) {
 				lastKey = VK_MOUSE_BEGIN - 1 + event->button.button;
 			}
 			break;
 
+#if ANDROID
+        case SDL_MOUSEBUTTONUP:
+            if (event->button.button == SDL_BUTTON_LEFT) {
+                isLeftMouseButtonDown = false;
+            }
+            break;
+#endif
 		case SDL_KEYDOWN:
 			if (!lastKey) {
 				lastKey = VK_KEYBOARD_BEGIN + event->key.keysym.scancode;
@@ -878,7 +894,7 @@ s32 inputReadController(s32 idx, OSContPad *npad)
 	return 0;
 }
 
-static inline void inputUpdateMouse(void)
+void inputUpdateMouse(void)
 {
 	s32 mx, my;
 	mouseButtons = SDL_GetMouseState(&mx, &my);
@@ -1224,6 +1240,7 @@ static inline u32 inputContToContKey(const u32 cont)
 
 s32 inputButtonPressed(s32 idx, u32 contbtn)
 {
+    return 0;
 	if (idx < 0 || idx >= INPUT_MAX_CONTROLLERS) {
 		return 0;
 	}
@@ -1246,7 +1263,7 @@ s32 inputMouseGetPosition(s32 *x, s32 *y)
 {
 	if (x) *x = mouseX * videoGetNativeWidth() / videoGetWidth();
 	if (y) *y = mouseY * videoGetNativeHeight() / videoGetHeight();
-	return (mouseDX != 0 || mouseDY != 0);
+	return true;
 }
 
 void inputMouseGetRawDelta(s32 *dx, s32 *dy)

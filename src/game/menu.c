@@ -4688,6 +4688,12 @@ void func0f0fa6ac(void)
 	}
 }
 
+#ifdef ANDROID
+extern void inputUpdateMouse(void);
+static bool updateSelectedItem = false;
+extern bool isLeftMouseButtonDown;
+#endif
+
 void menuProcessInput(void)
 {
 	s32 yhelddir;
@@ -4734,6 +4740,10 @@ void menuProcessInput(void)
 	inputs.back = 0;
 	inputs.shoulder = 0;
 	inputs.back2 = 0;
+
+#if ANDROID
+    inputUpdateMouse();
+#endif
 
 #ifndef PLATFORM_N64
 	inputs.mouseheld = false;
@@ -4844,9 +4854,21 @@ void menuProcessInput(void)
 				inputs.back = 1;
 			}
 
+#ifndef ANDROID
 			if (buttonsnow & Z_TRIG) {
+#else
+			if (buttonsnow & Z_TRIG && !inputs.mouseheld) {
+#endif
 				inputs.select = 1;
 			}
+
+#if ANDROID
+            if (updateSelectedItem) {
+                inputs.select = 1;
+                isLeftMouseButtonDown = false;
+                updateSelectedItem = false;
+            }
+#endif
 
 			if (buttonsnow & START_BUTTON) {
 				starttap = true;
@@ -5270,6 +5292,11 @@ void menuProcessInput(void)
 			break;
 		}
 	}
+#if ANDROID
+    if (isLeftMouseButtonDown) {
+       updateSelectedItem = true;
+    }
+#endif
 }
 
 Gfx *menugfxRenderBgFailureAlt(Gfx *gdl);
