@@ -440,25 +440,27 @@ static void rescanGameControllers(void)
         }
     }
 
-	// first try to assign the controllers that we had last time
-	// we're still free to check by device index before any controller device events fire
-	for (s32 cidx = 0; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
-		const s32 jidx = padsCfg[cidx].deviceIndex;
-		if (jidx >= 0 && jidx < numJoysticks) {
-			if (SDL_IsGameController(jidx) && inputControllerGetIndexByDeviceIndex(jidx) < 0) {
-				// using the full assign function in case user sets same index for several players
-				if (inputTryController(cidx, jidx)) {
-					// success
-					continue;
-				}
-			}
-			// nothing was there, forget it
-			padsCfg[cidx].deviceIndex = -1;
-		}
-	}
+    const char* virtualControllerName = "Xbox Series X Controller";
+    const int virtualBallsCount = 1;
+    int virtualControllerIndex = -1;
+
+    for (int i = 0; i < numJoysticks; i++) {
+        SDL_Joystick *js = SDL_JoystickOpen(i);
+        const char* joystickName = SDL_JoystickName(js);
+        const int ballsCount =  SDL_JoystickNumBalls(js);
+        SDL_JoystickClose(js);
+
+        if (virtualBallsCount == ballsCount && joystickName && strcmp(joystickName, virtualControllerName) == 0){
+            virtualControllerIndex = i;
+            break;
+        }
+    }
 
 	// now try autofilling the rest, starting with firstController
 	for (s32 jidx = 0; jidx < numJoysticks; ++jidx) {
+        if (virtualControllerIndex!=-1 && jidx!=virtualControllerIndex){
+            continue;
+        }
 		if (SDL_IsGameController(jidx) && inputControllerGetIndexByDeviceIndex(jidx) < 0) {
 			for (s32 cidx = firstController; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
 				if (inputTryController(cidx, jidx)) {
