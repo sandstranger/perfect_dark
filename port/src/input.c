@@ -424,6 +424,10 @@ static inline s32 inputTryController(const s32 cidx, const s32 jidx)
 	return 0;
 }
 
+#if ANDROID
+char *virtualControllerGUID = nullptr;
+#endif
+
 static void rescanGameControllers(void)
 {
 	SDL_GameControllerUpdate();
@@ -440,21 +444,26 @@ static void rescanGameControllers(void)
         }
     }
 
-    const char* virtualControllerName = "Xbox Series X Controller";
-    const int virtualBallsCount = 1;
     int virtualControllerIndex = -1;
 
-    for (int i = 0; i < numJoysticks; i++) {
-        SDL_Joystick *js = SDL_JoystickOpen(i);
-        const char* joystickName = SDL_JoystickName(js);
-        const int ballsCount =  SDL_JoystickNumBalls(js);
-        SDL_JoystickClose(js);
+#if ANDROID
+    if (virtualControllerGUID!= nullptr) {
+        for (int i = 0; i < numJoysticks; i++) {
+            SDL_Joystick *js = SDL_JoystickOpen(i);
+            if (js != nullptr) {
+                const SDL_JoystickGUID guid = SDL_JoystickGetGUID(js);
+                char guid_str[33];
+                SDL_JoystickGetGUIDString(guid, guid_str, sizeof(guid_str));
+                SDL_JoystickClose(js);
 
-        if (virtualBallsCount == ballsCount && joystickName && strcmp(joystickName, virtualControllerName) == 0){
-            virtualControllerIndex = i;
-            break;
+                if (strcmp(guid_str, virtualControllerGUID) == 0) {
+                    virtualControllerIndex = i;
+                    break;
+                }
+            }
         }
     }
+#endif
 
 	// now try autofilling the rest, starting with firstController
 	for (s32 jidx = 0; jidx < numJoysticks; ++jidx) {
@@ -479,7 +488,10 @@ static void rescanGameControllers(void)
 #if ANDROID
 bool isLeftMouseButtonDown = false;
 
-void rescanGameControllersForced(){
+void rescanGameControllersForced(char *targetVirtualControllerGUID){
+    if (targetVirtualControllerGUID!= nullptr && strlen(targetVirtualControllerGUID) > 0 && virtualControllerGUID== nullptr){
+        virtualControllerGUID = strdup(targetVirtualControllerGUID);
+    }
     rescanGameControllers();
 }
 
