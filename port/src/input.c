@@ -433,7 +433,7 @@ static void rescanGameControllers(void)
 	connectedMask = 1; // always report first controller as connected
 
     for (s32 cidx = 0; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
-        if (padsCfg[cidx].deviceIndex){
+        if (padsCfg[cidx].deviceIndex!=-1){
             SDL_GameControllerClose(pads[cidx]);
             pads[cidx] = nullptr;
             padsCfg[cidx].deviceIndex = -1;
