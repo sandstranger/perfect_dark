@@ -406,7 +406,8 @@ static inline void inputCloseAllControllers(void)
 		if (pads[cidx]) {
 			inputCloseController(cidx);
 			pads[cidx] = NULL;
-		}
+            padsCfg[cidx].deviceIndex = -1;
+        }
 	}
 
 	connectedMask = 1; // always report first controller as connected
@@ -424,10 +425,6 @@ static inline s32 inputTryController(const s32 cidx, const s32 jidx)
 	return 0;
 }
 
-#if ANDROID
-char *virtualControllerGUID = nullptr;
-#endif
-
 static void rescanGameControllers(void)
 {
 	SDL_GameControllerUpdate();
@@ -436,31 +433,15 @@ static void rescanGameControllers(void)
 
 	connectedMask = 1; // always report first controller as connected
 
-    for (s32 cidx = 0; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
-        if (padsCfg[cidx].deviceIndex!=-1){
-            SDL_GameControllerClose(pads[cidx]);
-            pads[cidx] = nullptr;
-            padsCfg[cidx].deviceIndex = -1;
-        }
-    }
+    inputCloseAllControllers();
 
     int virtualControllerIndex = -1;
 
 #if ANDROID
-    if (virtualControllerGUID!= nullptr) {
-        for (int i = 0; i < numJoysticks; i++) {
-            SDL_Joystick *js = SDL_JoystickOpen(i);
-            if (js != nullptr) {
-                const SDL_JoystickGUID guid = SDL_JoystickGetGUID(js);
-                char guid_str[33];
-                SDL_JoystickGetGUIDString(guid, guid_str, sizeof(guid_str));
-                SDL_JoystickClose(js);
-
-                if (strcmp(guid_str, virtualControllerGUID) == 0) {
-                    virtualControllerIndex = i;
-                    break;
-                }
-            }
+    for (int i = 0; i < numJoysticks; i++) {
+        if(SDL_JoystickIsVirtual(i)){
+            virtualControllerIndex = i;
+            break;
         }
     }
 #endif
@@ -488,10 +469,7 @@ static void rescanGameControllers(void)
 #if ANDROID
 bool isLeftMouseButtonDown = false;
 
-void rescanGameControllersForced(char *targetVirtualControllerGUID){
-    if (targetVirtualControllerGUID!= nullptr && strlen(targetVirtualControllerGUID) > 0 && virtualControllerGUID== nullptr){
-        virtualControllerGUID = strdup(targetVirtualControllerGUID);
-    }
+void rescanGameControllersForced(){
     rescanGameControllers();
 }
 
