@@ -424,13 +424,21 @@ static inline s32 inputTryController(const s32 cidx, const s32 jidx)
 	return 0;
 }
 
-static inline void inputInitAllControllers(void)
+static void rescanGameControllers(void)
 {
 	SDL_GameControllerUpdate();
 
 	numJoysticks = SDL_NumJoysticks();
 
 	connectedMask = 1; // always report first controller as connected
+
+    for (s32 cidx = 0; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
+        if (padsCfg[cidx].deviceIndex){
+            SDL_GameControllerClose(pads[cidx]);
+            pads[cidx] = nullptr;
+            padsCfg[cidx].deviceIndex = -1;
+        }
+    }
 
 	// first try to assign the controllers that we had last time
 	// we're still free to check by device index before any controller device events fire
@@ -468,37 +476,23 @@ static inline void inputInitAllControllers(void)
 
 #if ANDROID
 bool isLeftMouseButtonDown = false;
+
+void rescanGameControllersForced(){
+    rescanGameControllers();
+}
+
 #endif
 
 static int inputEventFilter(void *data, SDL_Event *event)
 {
 	switch (event->type) {
-		case SDL_CONTROLLERDEVICEADDED:
-			for (s32 i = firstController; i < INPUT_MAX_CONTROLLERS; ++i) {
-				if (!pads[i]) {
-					pads[i] = SDL_GameControllerOpen(event->cdevice.which);
-					if (pads[i]) {
-						inputInitController(i, event->cdevice.which);
-					}
-					break;
-				}
-			}
-			break;
-
-		case SDL_CONTROLLERDEVICEREMOVED: {
-			SDL_GameController *ctrl = SDL_GameControllerFromInstanceID(event->cdevice.which);
-			const s32 idx = inputControllerGetIndex(ctrl);
-			if (idx >= 0) {
-				inputCloseController(idx);
-				padsCfg[idx].deviceIndex = -1;
-			}
-			break;
-		}
-
-		case SDL_JOYDEVICEADDED:
-		case SDL_JOYDEVICEREMOVED:
-			numJoysticks = SDL_NumJoysticks(); // joystick count has changed
-			break;
+        case SDL_JOYDEVICEADDED:
+        case SDL_JOYDEVICEREMOVED:
+        case SDL_CONTROLLERDEVICEADDED:
+        case SDL_CONTROLLERDEVICEREMOVED:
+        case SDL_CONTROLLERDEVICEREMAPPED:
+            rescanGameControllers();
+            break;
 
 		case SDL_MOUSEWHEEL:
 			mouseWheel = event->wheel.y;
@@ -727,15 +721,20 @@ s32 inputInit(void)
 		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_STEAMDECK, "1");
 #endif
 	}
+
+#ifndef ANDROID
 	if (useRawInput) {
 		SDL_SetHint(SDL_HINT_JOYSTICK_RAWINPUT, "1");
 		SDL_SetHint(SDL_HINT_JOYSTICK_RAWINPUT_CORRELATE_XINPUT, "1");
 	}
+#else
+    SDL_SetHint(SDL_HINT_JOYSTICK_RAWINPUT, "1");
+    SDL_SetHint(SDL_HINT_JOYSTICK_RAWINPUT_CORRELATE_XINPUT, "1");
+#endif
 
 	if (!SDL_WasInit(SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC)) {
 		SDL_InitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
 	}
-
 
 #ifndef ANDROID
 	// try to load controller db from an external file in the save folder
@@ -754,7 +753,7 @@ s32 inputInit(void)
         SDL_Log("Custom controller db was loaded from: %s", pathToSdl2ControllerDb);
     }
 #endif
-	inputInitAllControllers();
+    rescanGameControllers();
 
 	// since the main event loop is elsewhere, we can receive some events we need using a watcher
 	SDL_AddEventWatch(inputEventFilter, NULL);
