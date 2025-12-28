@@ -453,7 +453,7 @@ static void rescanGameControllers(void)
         }
 		if (SDL_IsGameController(jidx) && inputControllerGetIndexByDeviceIndex(jidx) < 0) {
 			for (s32 cidx = firstController; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
-				if (inputTryController(cidx, jidx)) {
+				if (inputTryController(cidx, jidx) && virtualControllerIndex!=-1) {
 					break;
 				}
 			}
