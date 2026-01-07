@@ -149,7 +149,7 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
     }
 #else
     fullscreen_state = true;
-    Uint32 flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN;
+    Uint32 flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP;
 #endif
 
 #ifdef SDL_WINDOW_ALLOW_HIGHDPI
