@@ -200,18 +200,20 @@ PD_CONSTRUCTOR static void gameConfigInit(void)
 }
 
 #ifdef ANDROID
-void resumeSound() {
+__attribute__((used)) __attribute__((visibility("default")))
+void onNativeResume() {
 }
-
-void pauseSound() {
+__attribute__((used)) __attribute__((visibility("default")))
+void onNativePause() {
 }
-
+__attribute__((used)) __attribute__((visibility("default")))
 bool needToInvokeMouseButtonsEvents(){
     bool inMenu = g_MenuData.count > 0;
     bool inCutScene = g_Vars.in_cutscene > 0;
     return inMenu || inCutScene;
 }
 
+__attribute__((used)) __attribute__((visibility("default")))
 bool needToShowScreenControls() {
     return !needToInvokeMouseButtonsEvents();
 }
