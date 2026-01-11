@@ -27,8 +27,20 @@ static int target_fps = 120; // above 60 since vsync is enabled by default
 static uint64_t previous_time;
 static uint64_t qpc_freq;
 
+#if ANDROID
+typedef void (*forceLandScapeActivityOrientationDelegate)();
+static forceLandScapeActivityOrientationDelegate activityOrientationChangerInstance = nullptr;
+#endif
+
 #define FRAME_INTERVAL_US_NUMERATOR 1000000
 #define FRAME_INTERVAL_US_DENOMINATOR (target_fps)
+
+#if ANDROID
+__attribute__((used)) __attribute__((visibility("default")))
+void registerForceLandscapeActivityOrientationCallback (forceLandScapeActivityOrientationDelegate instance) {
+    activityOrientationChangerInstance = instance;
+}
+#endif
 
 static int32_t gfx_sdl_get_maximized_state(void) {
     return (int32_t)maximized_state;
@@ -332,7 +344,14 @@ static void gfx_sdl_get_dimensions(uint32_t* width, uint32_t* height, int32_t* p
 
 static void gfx_sdl_handle_events(void) {
     SDL_Event event;
+
+
     while (SDL_PollEvent(&event)) {
+#if ANDROID
+        if (event.type == SDL_APP_DIDENTERFOREGROUND && activityOrientationChangerInstance!= nullptr){
+            activityOrientationChangerInstance();
+        }
+#endif
         switch (event.type) {
 #ifndef ANDROID
             case SDL_KEYDOWN:
