@@ -36,9 +36,11 @@ static forceLandScapeActivityOrientationDelegate activityOrientationChangerInsta
 #define FRAME_INTERVAL_US_DENOMINATOR (target_fps)
 
 #if ANDROID
+extern "C" {
 __attribute__((used)) __attribute__((visibility("default")))
-void registerForceLandscapeActivityOrientationCallback (forceLandScapeActivityOrientationDelegate instance) {
+void registerForceLandscapeActivityOrientationCallback(forceLandScapeActivityOrientationDelegate instance) {
     activityOrientationChangerInstance = instance;
+}
 }
 #endif
 
