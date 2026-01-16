@@ -19,6 +19,8 @@
 #include "utils.h"
 #if ANDROID
 #include <unistd.h>
+#include <string.h>
+
 #endif
 
 u32 g_OsMemSize = 0;
@@ -46,6 +48,20 @@ s32 g_SkipIntro = false;
 s32 g_FileAutoSelect = -1;
 
 extern s32 g_StageNum;
+
+#if ANDROID
+char* g_pathToHomeDirectory = nullptr;
+char *g_pathToSDLControllerDB = nullptr;
+
+static void freeChars(char **targetChars)
+{
+    if (targetChars && *targetChars)
+    {
+        free(*targetChars);
+        *targetChars = nullptr;
+    }
+}
+#endif
 
 s32 bootGetMemSize(void)
 {
@@ -109,7 +125,7 @@ int main(int argc, const char **argv)
 		crashInit();
 	}
 #else
-    chdir(getenv("HOME_DIRECTORY"));
+    chdir(g_pathToHomeDirectory);
 #endif
 	sysInit();
 	fsInit();
@@ -164,7 +180,10 @@ int main(int argc, const char **argv)
 	}
 
 	mainProc();
-
+#if ANDROID
+    freeChars(&g_pathToHomeDirectory);
+    freeChars(&g_pathToSDLControllerDB);
+#endif
 	return 0;
 }
 
@@ -221,5 +240,19 @@ bool needToShowScreenControls() {
 __attribute__((used)) __attribute__((visibility("default")))
 bool needToReInitGameControllers (){
     return false;
+}
+__attribute__((used)) __attribute__((visibility("default")))
+void setPathToHomeDirectory (const char *pathToHomeDirectory) {
+    freeChars(&g_pathToHomeDirectory);
+    g_pathToHomeDirectory = strdup(pathToHomeDirectory);
+}
+
+__attribute__((used)) __attribute__((visibility("default")))
+void setPathToSDLControllerDB (const char *pathToSDLControllerDB){
+    freeChars(&g_pathToSDLControllerDB);
+    g_pathToSDLControllerDB = strdup(pathToSDLControllerDB);
+}
+__attribute__((used)) __attribute__((visibility("default")))
+void setUseGLES2_0State(const bool useGLES2_0) {
 }
 #endif

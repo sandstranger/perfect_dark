@@ -109,10 +109,10 @@ s32 fsInit(void)
 		sysGetHomePath(homeDir, FS_MAXPATH);
 	}
 #else
-    const char *pathToHomeDirectory = getenv("HOME_DIRECTORY");
-    const size_t pathToHomeDirectorySize = strlen(pathToHomeDirectory);
-    strncpy(exeDir, pathToHomeDirectory, pathToHomeDirectorySize);
-    strncpy(homeDir, pathToHomeDirectory, pathToHomeDirectorySize);
+    extern char* g_pathToHomeDirectory;
+    const size_t pathToHomeDirectorySize = strlen(g_pathToHomeDirectory);
+    strncpy(exeDir, g_pathToHomeDirectory, pathToHomeDirectorySize);
+    strncpy(homeDir, g_pathToHomeDirectory, pathToHomeDirectorySize);
 #endif
 	// get path to base dir and expand it if needed
 	const char *path = sysArgGetString("--basedir");

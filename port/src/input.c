@@ -746,11 +746,11 @@ s32 inputInit(void)
 		}
 	}
 #else
-    char *pathToSdl2ControllerDb = getenv("PATH_TO_SDL2_CONTROLLER_DB");
-    if (SDL_GameControllerAddMappingsFromFile(pathToSdl2ControllerDb) < 0) {
+    extern char* g_pathToSDLControllerDB;
+    if (SDL_GameControllerAddMappingsFromFile(g_pathToSDLControllerDB) < 0) {
         SDL_Log("Couldn't load mappings: %s\n", SDL_GetError());
     } else{
-        SDL_Log("Custom controller db was loaded from: %s", pathToSdl2ControllerDb);
+        SDL_Log("Custom controller db was loaded from: %s", g_pathToSDLControllerDB);
     }
 #endif
     rescanGameControllers();
