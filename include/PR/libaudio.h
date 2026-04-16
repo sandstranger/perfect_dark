@@ -174,26 +174,42 @@ typedef void    *ALFxRef;
 enum    {AL_ADPCM_WAVE = 0,
          AL_RAW16_WAVE};
 
+#if defined(__arm__) && defined(__ARM_ARCH_7A__)
 typedef struct __attribute__((packed)){
+#else
+typedef struct{
+#endif
     s32 order;
     s32 npredictors;
     s16 book[128];        /* Actually variable size. Must be 8-byte aligned */
 } ALADPCMBook;
 
-typedef struct __attribute__((packed)) {
+#if defined(__arm__) && defined(__ARM_ARCH_7A__)
+typedef struct __attribute__((packed)){
+#else
+typedef struct{
+#endif
     u32         start;
     u32         end;
     u32         count;
     ADPCM_STATE state;
 } ALADPCMloop;
 
-typedef struct __attribute__((packed)) {
+#if defined(__arm__) && defined(__ARM_ARCH_7A__)
+typedef struct __attribute__((packed)){
+#else
+typedef struct{
+#endif
     u32         start;
     u32         end;
     u32         count;
 } ALRawLoop;
 
-typedef struct __attribute__((packed)) {
+#if defined(__arm__) && defined(__ARM_ARCH_7A__)
+typedef struct __attribute__((packed)){
+#else
+typedef struct{
+#endif
     ALMicroTime attackTime;
     ALMicroTime decayTime;
     ALMicroTime releaseTime;
@@ -201,7 +217,11 @@ typedef struct __attribute__((packed)) {
     u8          decayVolume;
 } ALEnvelope;
 
+#if defined(__arm__) && defined(__ARM_ARCH_7A__)
 typedef struct __attribute__((packed)){
+#else
+typedef struct{
+#endif
     u8          velocityMin;
     u8          velocityMax;
     u8          keyMin;
@@ -210,16 +230,28 @@ typedef struct __attribute__((packed)){
     s8          detune;
 } ALKeyMap;
 
+#if defined(__arm__) && defined(__ARM_ARCH_7A__)
 typedef struct __attribute__((packed)){
+#else
+typedef struct{
+#endif
     ALADPCMloop *loop;
     ALADPCMBook *book;
 } ALADPCMWaveInfo;
 
-typedef struct __attribute__((packed)) {
+#if defined(__arm__) && defined(__ARM_ARCH_7A__)
+typedef struct __attribute__((packed)){
+#else
+typedef struct{
+#endif
     ALRawLoop *loop;
 } ALRAWWaveInfo;
 
+#if defined(__arm__) && defined(__ARM_ARCH_7A__)
 typedef struct __attribute__((packed)) ALWaveTable_s  {
+#else
+typedef struct ALWaveTable_s  {
+#endif
     u8          *base;          /* ptr to start of wave data    */
     s32         len;            /* length of data in bytes      */
     u8          type;           /* compression type             */
@@ -230,7 +262,11 @@ typedef struct __attribute__((packed)) ALWaveTable_s  {
     } waveInfo;
 } ALWaveTable;
 
+#if defined(__arm__) && defined(__ARM_ARCH_7A__)
 typedef struct __attribute__((packed)) ALSound_s {
+#else
+typedef struct ALSound_s {
+#endif
     ALEnvelope  *envelope;
     ALKeyMap    *keyMap;
     ALWaveTable *wavetable;     /* offset to wavetable struct           */
