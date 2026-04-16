@@ -9,6 +9,7 @@
 #define MINIMP3_IMPLEMENTATION
 #include "external/minimp3.h"
 
+#ifndef ANDROID
 #ifdef __SSE4_1__
 #include <immintrin.h>
 #define HAS_SSE41 1
@@ -20,6 +21,15 @@
 #else
 #define HAS_SSE41 0
 #define HAS_NEON 0
+#endif
+#else
+#define HAS_SSE41 1
+#define HAS_NEON 0
+#if __ARM_NEON
+#include "sse2neon.h"
+#else
+#include <immintrin.h>
+#endif
 #endif
 
 #pragma GCC optimize ("unroll-loops")
