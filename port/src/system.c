@@ -35,10 +35,14 @@ __attribute__((dllexport)) u32 AmdPowerXpressRequestHighPerformance = 1;
 #include <unistd.h>
 
 // figure out how to yield
-#if defined(PLATFORM_X86) || defined(PLATFORM_X86_64)
+#if defined(PLATFORM_X86) || defined(PLATFORM_X86_64) || ANDROID
 // this should work even if the code is not built with SSE enabled, at least on gcc and clang,
 // but if it doesn't we'll have to use  __builtin_ia32_pause() or something
+#if defined(__ARM_NEON) || defined(__aarch64__) || defined(_M_ARM64)
+#include "sse2neon.h"
+#else
 #include <immintrin.h>
+#endif
 #define DO_YIELD() _mm_pause()
 #elif defined(PLATFORM_ARM) && (defined(PLATFORM_64BIT) || PLATFORM_ARM == 7 || PLATFORM_ARM == 8)
 // same as YieldProcessor() on ARM Windows
