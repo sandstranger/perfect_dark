@@ -1,13 +1,17 @@
-#include <stdio.h>
+#include <cstdio>
 #include <SDL.h>
 #include <unistd.h>
-#include <time.h>
+#include <ctime>
 
 #include "platform.h"
 #include "system.h"
 
 #include "gfx_window_manager_api.h"
 #include "gfx_screen_config.h"
+
+#if ANDROID
+#include "AngleShaderCache.h"
+#endif
 
 static SDL_Window* wnd;
 static SDL_GLContext ctx;
@@ -258,6 +262,10 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
 
     SDL_GL_MakeCurrent(wnd, ctx);
     SDL_GL_SetSwapInterval(1);
+
+#if ANDROID
+    angle_blobcache_install("perfect_dark");
+#endif
 
     SDL_ShowWindow(wnd);
 
