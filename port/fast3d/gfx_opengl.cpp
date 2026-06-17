@@ -404,10 +404,11 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         // used to be two for loops from 0 to 4, but apparently intel drivers crashed trying to unroll it
         // used to have a const weight array, but apparently drivers for the GT620 don't like const array initializers
 
-        if (current_filter_mode == FILTER_THREE_POINT)
+        if (current_filter_mode == FILTER_THREE_POINT) {
             append_line(fs_buf, &fs_len, "lowp vec4 hookTexture2D(in sampler2D t, in vec2 uv, in vec2 texSize, in int three_point_filter) {");
-        else
+        } else {
             append_line(fs_buf, &fs_len, "lowp vec4 hookTexture2D(in sampler2D t, in vec2 uv, in vec2 texSize) {");
+        }
 
         append_line(fs_buf, &fs_len, "    lowp vec4 cw = vec4(0.0);");
         append_line(fs_buf, &fs_len, "    for (int i = 0; i < 16; ++i) {");
@@ -415,10 +416,14 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         append_line(fs_buf, &fs_len, "        lowp float w = 0.009947 - length(xy) * 0.001;");
         append_line(fs_buf, &fs_len, "        vec2 scaled_uv = uv + (vec2(-1.5) + xy) / texSize;");
 
-        if (current_filter_mode == FILTER_THREE_POINT)
-            append_line(fs_buf, &fs_len, "        lowp vec4 tex = mix(SAMPLE_TEX(t, scaled_uv), filter3point(t, scaled_uv, texSize), three_point_filter);");
-        else
+        if (current_filter_mode == FILTER_THREE_POINT) {
+            append_line(fs_buf, &fs_len, "        highp vec4 a = SAMPLE_TEX(t, scaled_uv);");
+            append_line(fs_buf, &fs_len, "        highp vec4 b = filter3point(t, scaled_uv, texSize);");
+            append_line(fs_buf, &fs_len, "        highp float k = clamp(float(three_point_filter), 0.0, 1.0);");
+            append_line(fs_buf, &fs_len, "        highp vec4 tex = mix(a, b, k);");
+        } else {
             append_line(fs_buf, &fs_len, "        lowp vec4 tex = SAMPLE_TEX(t, scaled_uv);");
+        }
 
         append_line(fs_buf, &fs_len, "        cw += vec4(tex.rgb * w, w);");
         append_line(fs_buf, &fs_len, "    }");
@@ -427,7 +432,10 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     } else {
         if (current_filter_mode == FILTER_THREE_POINT) {
             append_line(fs_buf, &fs_len, "vec4 hookTexture2D(in sampler2D tex, in vec2 uv, in vec2 texSize, in int three_point_filter) {");
-            append_line(fs_buf, &fs_len, "    return mix(SAMPLE_TEX(tex, uv), filter3point(tex, uv, texSize), three_point_filter);");
+            append_line(fs_buf, &fs_len, "    highp vec4 a = SAMPLE_TEX(tex, uv);");
+            append_line(fs_buf, &fs_len, "    highp vec4 b = filter3point(tex, uv, texSize);");
+            append_line(fs_buf, &fs_len, "    highp float k = clamp(float(three_point_filter), 0.0, 1.0);");
+            append_line(fs_buf, &fs_len, "    return mix(a, b, k);");
             append_line(fs_buf, &fs_len, "}");
         } else {
             append_line(fs_buf, &fs_len, "vec4 hookTexture2D(in sampler2D tex, in vec2 uv, in vec2 texSize) {");
