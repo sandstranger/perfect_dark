@@ -169,8 +169,8 @@ void *mempGetNextStageAllocation(void)
 void *mempAllocFromBank(struct memorypool *pool, u32 size, u8 poolnum)
 {
 	u8 *allocation;
-	
-#ifdef __vita__
+
+#ifdef ANDROID
 	// Align to 8 bytes
 	size = ((size + 0x07) & ~(size_t)0x07);
 #endif
@@ -255,7 +255,7 @@ s32 mempRealloc(void *allocation, s32 newsize, u8 poolnum)
 	s32 origsize;
 	s32 growsize;
 
-#ifdef __vita__
+#ifdef ANDROID
 	// Align to 8 bytes
 	newsize = ((newsize + 0x07) & ~(size_t)0x07);
 #endif

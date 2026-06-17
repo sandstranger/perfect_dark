@@ -242,7 +242,7 @@ static u32 convertCover(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_covers
 	return dstpos;
 }
 
-#ifdef __vita__
+#ifdef ANDROID
 #define ALIGN_4(v) (((v) + 3) & ~3)
 #else
 #define ALIGN_4(v)
@@ -263,7 +263,7 @@ static u32 convertPadsFile(u8 *dst, u8 *src)
 
 	// Pads
 	dstpos = ALIGN_4(convertPads(dst, dstpos, src, sizeof(struct n64_header), num_pads));
-	
+
 	// Waypoints
 	host_header->ptr_waypoints = (dstpos);
 	dstpos = ALIGN_4(convertWayPoints(dst, dstpos, src, PD_BE32(n64_header->ptr_waypoints)));
@@ -275,14 +275,14 @@ static u32 convertPadsFile(u8 *dst, u8 *src)
 	// Cover
 	host_header->ptr_cover = (dstpos);
 	dstpos = ALIGN_4(convertCover(dst, dstpos, src, PD_BE32(n64_header->ptr_cover), num_covers));
-	
-	
+
+
 	return dstpos;
 }
 
 u8* preprocessPadsFile(u8 *data, u32 size, u32 *outSize) {
 	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_PADS);
-#ifdef __vita__
+#ifdef ANDROID
 	newSizeEstimated += 128;
 #endif
 	u8* dst = sysMemZeroAlloc(newSizeEstimated);
