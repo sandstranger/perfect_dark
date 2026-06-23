@@ -20,7 +20,7 @@
 #if ANDROID
 #include <unistd.h>
 #include <string.h>
-
+#include "SwappyController.h"
 #endif
 
 u32 g_OsMemSize = 0;
@@ -183,6 +183,7 @@ int main(int argc, const char **argv)
 #if ANDROID
     freeChars(&g_pathToHomeDirectory);
     freeChars(&g_pathToSDLControllerDB);
+    DestroySwappy();
 #endif
 	return 0;
 }

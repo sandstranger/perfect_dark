@@ -57,8 +57,11 @@ static s32 texFilter = FILTER_LINEAR;
 static s32 texFilter2D = true;
 static s32 texDetail = false;
 static s32 texMipmapFilter = MIPMAP_LINEAR;
+#ifndef ANDROID
 static u32 texAnisotropicFilter = 4;
-
+#else
+static u32 texAnisotropicFilter = 2;
+#endif
 static u32 dlcount = 0;
 static u32 frames = 0;
 static f64 startTime, endTime;

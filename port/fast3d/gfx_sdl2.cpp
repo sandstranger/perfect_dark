@@ -11,6 +11,7 @@
 
 #if ANDROID
 #include "AngleShaderCache.h"
+#include "SwappyController.h"
 #endif
 
 static SDL_Window* wnd;
@@ -44,6 +45,11 @@ extern "C" {
 __attribute__((used)) __attribute__((visibility("default")))
 void registerForceLandscapeActivityOrientationCallback(forceLandScapeActivityOrientationDelegate instance) {
     activityOrientationChangerInstance = instance;
+}
+
+__attribute__((used)) __attribute__((visibility("default")))
+void setTargetFPS (int targetFPS){
+    target_fps = targetFPS;
 }
 }
 #endif
@@ -125,7 +131,11 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
         sysFatalError("Could not init SDL:\n%s", SDL_GetError());
     }
 
+#ifndef ANDROID
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+#else
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+#endif
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     if (sysArgCheck("--debug-gl")) {
@@ -430,7 +440,13 @@ static void gfx_sdl_swap_buffers_begin(void) {
     if (target_fps) {
         sync_framerate_with_timer();
     }
+#ifdef ANDROID
+    if (SwappySwapBuffers()){
+        return;
+    }
+#endif
     SDL_GL_SwapWindow(wnd);
+
 }
 
 static void gfx_sdl_swap_buffers_end(void) {
