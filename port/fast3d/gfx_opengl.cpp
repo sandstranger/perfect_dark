@@ -1053,7 +1053,9 @@ static void gfx_opengl_start_frame(void) {
 }
 
 static void gfx_opengl_end_frame(void) {
+#ifndef ANDROID    
     glFlush();
+#endif    
 }
 
 static void gfx_opengl_finish_render(void) {
